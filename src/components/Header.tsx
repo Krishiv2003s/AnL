@@ -73,6 +73,12 @@ export function Header() {
                 </Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
+                <Link to="/balance-sheet">
+                  <Scale className="mr-2 h-4 w-4" />
+                  Bal. Sheet
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
                 <Link to="/support">
                   <Headphones className="mr-2 h-4 w-4" />
                   Support
