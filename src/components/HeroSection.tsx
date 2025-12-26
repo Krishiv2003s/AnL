@@ -22,7 +22,7 @@ export function HeroSection() {
           </div>
 
           {/* Main heading */}
-          <h1 className="mb-6 font-display text-5xl font-bold tracking-tight md:text-6xl lg:text-7xl animate-slide-up">
+          <h1 className="mb-6 font-display text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl animate-slide-up">
             <span className="text-primary/80">Your Financial</span>
             <br />
             <span className="text-primary">Assets & Liabilities</span>
@@ -31,25 +31,25 @@ export function HeroSection() {
           </h1>
 
           {/* Subheading */}
-          <p className="mb-10 text-lg text-primary/70 md:text-xl max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: "0.1s" }}>
+          <p className="mb-10 text-base text-primary/70 sm:text-lg md:text-xl max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: "0.1s" }}>
             Upload your bank statements, Form 16, and ledgers. Get instant AI-powered analysis,
             balance sheets, and personalized tax filing recommendations for India.
           </p>
 
           {/* Ad Banner */}
-          <div className="mb-10 w-full flex justify-center animate-fade-in">
+          <div className="mb-10 w-full flex justify-center animate-fade-in overflow-hidden">
             <AdBanner adSlot="1234567890" className="w-full max-w-3xl" />
           </div>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-            <Button variant="hero" size="xl" asChild>
+            <Button variant="hero" size="lg" className="sm:size-xl w-full sm:w-auto" asChild>
               <Link to="/auth?mode=signup">
                 Start Free Analysis
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button variant="hero-outline" size="xl" asChild>
+            <Button variant="hero-outline" size="lg" className="sm:size-xl w-full sm:w-auto" asChild>
               <Link to="/auth">
                 Sign In
               </Link>

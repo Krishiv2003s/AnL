@@ -52,17 +52,17 @@ export default function News() {
 
             <main className="container pt-24 pb-12 relative z-0">
                 <div className="max-w-4xl mx-auto">
-                    <div className="flex items-center justify-between mb-8">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                         <div>
-                            <h1 className="text-3xl font-bold flex items-center gap-2">
-                                <Newspaper className="h-8 w-8 text-primary" />
+                            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+                                <Newspaper className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
                                 Economic News
                             </h1>
-                            <p className="text-muted-foreground mt-2">
+                            <p className="text-sm sm:text-base text-muted-foreground mt-2">
                                 Latest Indian business & economic updates from the last 5 hours.
                             </p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => fetchNews()} disabled={loading}>
+                        <Button variant="outline" size="sm" onClick={() => fetchNews()} disabled={loading} className="w-full sm:w-auto">
                             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
                         </Button>
                     </div>
