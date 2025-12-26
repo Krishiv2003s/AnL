@@ -23,15 +23,16 @@ export default function News() {
         setLoading(true);
         setError(null);
         try {
-            const { data, error: funcError } = await supabase.functions.invoke('get-news', {
-                method: 'GET'
-            });
+            // Use Netlify Function instead of Supabase Edge Function
+            const response = await fetch('/.netlify/functions/get-news');
 
-            if (funcError) throw funcError;
+            if (!response.ok) throw new Error("Failed to fetch news. Deployment might still be in progress.");
+
+            const data = await response.json();
             setNews(data || []);
         } catch (err: any) {
             console.error("News error:", err);
-            setError(err.message || "Failed to fetch news. Please ensure the edge function is deployed.");
+            setError(err.message || "Failed to fetch news.");
         } finally {
             setLoading(false);
         }
