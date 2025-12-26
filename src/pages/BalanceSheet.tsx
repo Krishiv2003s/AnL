@@ -115,10 +115,13 @@ export default function BalanceSheet() {
     });
 
     useEffect(() => {
-        if (!authLoading && !user) navigate("/auth");
+        // Allow public viewing - remove mandatory redirect
         if (user) {
             fetchDocuments();
-            setDetails(prev => ({ ...prev, client_name: user.user_metadata?.username || "Client Name" }));
+            setDetails(prev => ({ ...prev, client_name: user?.user_metadata?.username || "Client Name" }));
+        } else if (!authLoading) {
+            setIsDocsLoaded(true); // Allow account rendering (of empty list) for guests
+            setLoading(false);
         }
     }, [user, authLoading]);
 
@@ -474,6 +477,14 @@ export default function BalanceSheet() {
                                 </Button>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {!user && !authLoading && (
+                    <div className="mb-8 p-6 border border-primary/20 bg-primary/5 rounded-xl text-center no-print">
+                        <h3 className="text-lg font-semibold mb-2">Want to generate your own Balance Sheet?</h3>
+                        <p className="text-muted-foreground mb-4">Sign in to upload your financial documents and get automated analysis.</p>
+                        <Button onClick={() => navigate("/auth")}>Sign In / Get Started</Button>
                     </div>
                 )}
 

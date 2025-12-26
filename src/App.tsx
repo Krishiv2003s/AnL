@@ -10,9 +10,10 @@ import BalanceSheet from "./pages/BalanceSheet";
 import Settings from "./pages/Settings";
 import Support from "./pages/Support";
 import ResetPassword from "./pages/ResetPassword";
-import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
+import News from "./pages/News";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-conditions" element={<TermsConditions />} />
+          <Route path="/news" element={<News />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
