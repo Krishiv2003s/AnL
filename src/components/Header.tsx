@@ -55,6 +55,18 @@ export function Header() {
           ) : (
             <>
               <Button variant="ghost" size="sm" asChild>
+                <Link to="/dashboard">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Analysis
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/support">
+                  <Headphones className="mr-2 h-4 w-4" />
+                  Support
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
                 <Link to="/auth">Sign In</Link>
               </Button>
               <Button variant="hero" size="sm" asChild>

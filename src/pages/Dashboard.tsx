@@ -37,11 +37,8 @@ export default function Dashboard() {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
 
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, authLoading, navigate]);
+
+  // Removed automatic redirect - allow viewing without login
 
   useEffect(() => {
     if (user) {
@@ -69,7 +66,16 @@ export default function Dashboard() {
   };
 
   const handleFileUpload = async (file: File, documentType: string) => {
-    if (!user) return;
+    // Check if user is authenticated before allowing upload
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to upload and analyze documents.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
 
 
 
