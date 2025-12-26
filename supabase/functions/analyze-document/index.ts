@@ -126,29 +126,22 @@ serve(async (req) => {
     const sanitizedFileName = fileName ? String(fileName).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 255) : 'document';
 
     const systemPrompt = `You are an expert Indian tax consultant and financial analyst. Analyze the provided financial document and extract ALL transactions and structured information.
-
-IMPORTANT: Extract EVERY transaction you can see in the document including:
-- All credits (deposits, income, transfers in)
-- All debits (withdrawals, expenses, transfers out)
-- Opening and closing balances
-- Interest earned
-- Any fees or charges
-
-Your task:
-1. Identify and categorize ALL transactions into accounts (Cash, Credit Card, Bank Transfer, Investment, Salary, Loan, Expense, Income, etc.)
-2. Calculate total credit, debit, and net balance for each account category
-3. Determine if each account is taxable under Indian tax laws
-4. Classify each account as Asset, Liability, or Neutral
-5. Provide detailed tax insights specific to Indian ITR filing
-6. Identify any red flags or warnings based on latest Indian tax regulations
-
-For each insight, determine the severity:
+ 
 - "error" for critical issues (exceeding cash limits, unreported crypto, etc.)
 - "warning" for potential issues (high cash transactions, missing documents)
 - "info" for general advice and recommendations
-
-Always suggest the appropriate ITR form (ITR-1, ITR-2, ITR-3, ITR-4) based on the income sources identified.
-
+ 
+Suggest appropriate ITR forms (ITR-1 to ITR-4) based on income sources.
+ 
+### EXTRACTION RULES:
+1. **NO DOUBLE COUNTING**: Strictly ignore "Total", "Subtotal", "Grand Total", or any summary rows within the tables. Only extract individual transaction entries.
+2. **ASSET CLASSIFICATION**: 
+   - Use 'asset' ONLY for balance-sheet items: Closing Bank Balance, Fixed Deposits, Shares/Mutual Funds, Property values.
+   - For Bank Statements: The ONLY 'asset' should be the final Closing Balance. Do NOT mark individual deposits or total credits as assets.
+3. **LIABILITY CLASSIFICATION**: Use 'liability' ONLY for debts: Loan Owed, Credit Card Outstanding, Payables.
+4. **NEUTRAL/FLOW CLASSIFICATION**: Use 'neutral' for all P&L/Flow items: Salary, Rent Income, Interest Income, Food Expense, Taxes Paid, etc. These are income/expenses, NOT assets/liabilities.
+5. **COI/Tax Documents**: Distinguish between "Total Income" (Neutral) and tax-deductible investments (Assets).
+ 
 Respond with a valid JSON object in this exact format:
 {
   "accounts": [
@@ -157,7 +150,7 @@ Respond with a valid JSON object in this exact format:
       "category": "cash|credit_card|bank_transfer|investment|salary|loan|expense|income|other",
       "total_credit": number (total money received),
       "total_debit": number (total money spent),
-      "net_balance": number (credit - debit),
+      "net_balance": number (current balance for assets/liabilities, or net flow for neutral),
       "is_taxable": boolean,
       "classification": "asset|liability|neutral",
       "tax_implications": "string explaining tax treatment"
@@ -174,9 +167,9 @@ Respond with a valid JSON object in this exact format:
     }
   ],
   "summary": {
-    "total_assets": number,
-    "total_liabilities": number,
-    "net_worth": number,
+    "total_assets": number (Sum of 'asset' classification items),
+    "total_liabilities": number (Sum of 'liability' classification items),
+    "net_worth": number (Assets - Liabilities),
     "primary_income_source": "string",
     "recommended_itr_form": "string",
     "tax_regime_suggestion": "Old Regime|New Regime"
