@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getSafeErrorMessage } from "@/lib/errorHandler";
-import { SubscriptionModal } from "@/components/SubscriptionModal";
+
 import { Loader2, TrendingUp, Activity } from "lucide-react";
 
 interface Document {
@@ -35,7 +35,7 @@ export default function Dashboard() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(true);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
-  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -71,21 +71,7 @@ export default function Dashboard() {
   const handleFileUpload = async (file: File, documentType: string) => {
     if (!user) return;
 
-    // Frontend safety check for free users
-    const usageCount = profile?.lifetime_docs_analyzed || 0;
-    const historyCount = documents.length;
-    const isPro = profile?.subscription_status === 'active';
 
-    // Check both profile count and history count for robustness
-    if (!isPro && (usageCount >= 1 || historyCount >= 1)) {
-      setIsSubscriptionModalOpen(true);
-      toast({
-        title: "Limit Reached",
-        description: "You've used your free analysis. Upgrade to Pro for unlimited access.",
-        variant: "default",
-      });
-      return;
-    }
 
     setIsUploading(true);
     setSelectedDocumentId(null);
@@ -178,21 +164,13 @@ export default function Dashboard() {
         description: "Your document has been analyzed successfully.",
       });
     } catch (error: any) {
-      if (error?.message?.includes('Free limit reached') || error?.code === 'PAYMENT_REQUIRED' || error?.is_limit_reached) {
-        setIsSubscriptionModalOpen(true);
-        toast({
-          title: "Limit Reached",
-          description: "You've used your free analysis. Upgrade to continue.",
-          variant: "default",
-        });
-      } else {
-        toast({
-          title: "Analysis Failed",
-          description: getSafeErrorMessage(error, "analyze document"),
-          variant: "destructive",
-        });
-      }
-    } finally {
+      toast({
+        title: "Analysis Failed",
+        description: getSafeErrorMessage(error, "analyze document"),
+        variant: "destructive",
+      });
+    }
+    finally {
       setIsUploading(false);
     }
   };
@@ -411,10 +389,7 @@ export default function Dashboard() {
         {/* Bottom Banner Ad */}
         <AdBannerPlaceholder className="h-20 mt-8" />
 
-        <SubscriptionModal
-          isOpen={isSubscriptionModalOpen}
-          onClose={() => setIsSubscriptionModalOpen(false)}
-        />
+
       </main>
     </div>
   );

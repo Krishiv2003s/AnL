@@ -69,36 +69,7 @@ serve(async (req) => {
       });
     }
 
-    // Check subscription status
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('subscription_status, subscription_end_date, lifetime_docs_analyzed')
-      .eq('user_id', user.id)
-      .single();
 
-    if (profileError) {
-      console.error('Profile fetch error:', profileError);
-      // Fail open or closed? Closed for MVP to prevent abuse, but might block legitimate users if profile missing.
-      // Profile creation is guaranteed by trigger.
-      throw new Error('Failed to fetch user profile');
-    }
-
-    const isActive = profile.subscription_status === 'active';
-    // Simplified check. Real world would check dates too, but 'active' status is main gate.
-
-    const usageCount = profile.lifetime_docs_analyzed || 0;
-    const FREE_LIMIT = 1;
-
-    if (!isActive && usageCount >= FREE_LIMIT) {
-      return new Response(JSON.stringify({
-        error: 'Free limit reached. Please upgrade to Pro for unlimited analysis.',
-        code: 'PAYMENT_REQUIRED',
-        is_limit_reached: true
-      }), {
-        status: 402,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
 
     const { documentContent, documentType, fileName, isBase64, mimeType } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -306,11 +277,11 @@ Respond with a valid JSON object in this exact format:
       };
     }
 
-    // Increment usage count for free users (and paid too, for stats)
-    if (!isActive || true) { // Always track usage
-      await supabase.from('profiles').update({
-        lifetime_docs_analyzed: usageCount + 1
-      }).eq('user_id', user.id);
+    // Increment usage count (optional, but good for stats)
+    // For now, skipping to avoid errors with deleted variables
+    if (user) {
+      // We could re-fetch profile here if we really wanted to track stats, 
+      // but for now let's just allow unlimited access without tracking constraint.
     }
 
     return new Response(JSON.stringify(analysisResult), {

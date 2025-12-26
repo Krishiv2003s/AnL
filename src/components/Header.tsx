@@ -42,12 +42,6 @@ export function Header() {
                 </Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/subscription">
-                  <Zap className="mr-2 h-4 w-4" />
-                  Subscription
-                </Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
                 <Link to="/settings">
                   <Settings className="mr-2 h-4 w-4" />
                   Settings

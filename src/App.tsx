@@ -10,7 +10,6 @@ import BalanceSheet from "./pages/BalanceSheet";
 import Settings from "./pages/Settings";
 import Support from "./pages/Support";
 import ResetPassword from "./pages/ResetPassword";
-import Subscription from "./pages/Subscription";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,7 +27,6 @@ const App = () => (
           <Route path="/balance-sheet" element={<BalanceSheet />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/support" element={<Support />} />
-          <Route path="/subscription" element={<Subscription />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
