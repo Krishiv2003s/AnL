@@ -5,7 +5,6 @@ import { SidebarAd } from "@/components/AdBanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ExternalLink, Newspaper, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 
 interface NewsItem {
     title: string;
@@ -32,7 +31,7 @@ export default function News() {
             setNews(data || []);
         } catch (err: any) {
             console.error("News error:", err);
-            setError(err.message || "Failed to fetch news.");
+            setError("Netlify News Error: " + (err.message || "Unknown error"));
         } finally {
             setLoading(false);
         }

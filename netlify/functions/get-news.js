@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 exports.handler = async function (event, context) {
     const CORS_HEADERS = {
         'Access-Control-Allow-Origin': '*',
@@ -15,10 +13,17 @@ exports.handler = async function (event, context) {
         const query = 'India economy OR India business OR RBI OR GDP OR Inflation';
         const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-IN&gl=IN&ceid=IN:en`;
 
+        console.log("Fetching news from:", url);
+
+        // Using global fetch (available in Node 18+)
         const response = await fetch(url);
-        if (!response.ok) throw new Error("Failed to fetch RSS from Google News");
+        if (!response.ok) {
+            console.error("RSS fetch failed:", response.status, response.statusText);
+            throw new Error(`Failed to fetch RSS from Google News: ${response.statusText}`);
+        }
 
         const xml = await response.text();
+        console.log("Received XML length:", xml.length);
 
         const items = [];
         const itemMatches = xml.matchAll(/<item>([\s\S]*?)<\/item>/g);
@@ -48,6 +53,8 @@ exports.handler = async function (event, context) {
             }
         }
 
+        console.log(`Returning ${items.length} news items`);
+
         return {
             statusCode: 200,
             headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
@@ -55,6 +62,7 @@ exports.handler = async function (event, context) {
         };
 
     } catch (error) {
+        console.error("Function error:", error);
         return {
             statusCode: 500,
             headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
