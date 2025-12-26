@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { AdSidebar } from "./AdSidebar";
 
 interface AdBannerProps {
   adSlot: string;
@@ -61,7 +62,7 @@ export function AdBannerPlaceholder({ className = "", vertical = false }: { clas
 export function SidebarAd({ side = "left" }: { side?: "left" | "right" }) {
   return (
     <aside className={`fixed top-24 bottom-12 hidden xl:flex flex-col gap-4 w-40 z-10 ${side === "left" ? "left-4" : "right-4"}`}>
-      <AdBannerPlaceholder vertical className="flex-1" />
+      <AdSidebar adSlot="1234567890" className="flex-1" />
     </aside>
   );
 }
