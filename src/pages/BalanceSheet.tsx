@@ -116,13 +116,21 @@ export default function BalanceSheet() {
 
     useEffect(() => {
         // Allow public viewing - remove mandatory redirect
-        if (user) {
-            fetchDocuments();
-            setDetails(prev => ({ ...prev, client_name: user?.user_metadata?.username || "Client Name" }));
-        } else if (!authLoading) {
-            setIsDocsLoaded(true); // Allow account rendering (of empty list) for guests
-            setLoading(false);
-        }
+        const determineState = async () => {
+            if (user) {
+                await fetchDocuments();
+                setDetails(prev => ({ ...prev, client_name: user?.user_metadata?.username || "Client Name" }));
+            } else if (!authLoading) {
+                setIsDocsLoaded(true); // Allow account rendering (of empty list) for guests
+            }
+
+            // Fail-safe: Always end loading if auth is done
+            if (!authLoading) {
+                setLoading(false);
+            }
+        };
+
+        determineState();
     }, [user, authLoading]);
 
     // Fetch accounts whenever selected documents change, but only after initial doc load
