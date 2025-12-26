@@ -5,6 +5,7 @@ import { SidebarAd } from "@/components/AdBanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ExternalLink, Newspaper, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NewsItem {
     title: string;
@@ -22,21 +23,15 @@ export default function News() {
         setLoading(true);
         setError(null);
         try {
-            // We'll use a Supabase Edge Function since it's already integrated
-            const response = await fetch('https://avubnhpompugktamckev.supabase.co/functions/v1/get-news', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
+            const { data, error: funcError } = await supabase.functions.invoke('get-news', {
+                method: 'GET'
             });
 
-            if (!response.ok) throw new Error("Failed to fetch news");
-
-            const data = await response.json();
-            setNews(data);
+            if (funcError) throw funcError;
+            setNews(data || []);
         } catch (err: any) {
             console.error("News error:", err);
-            setError(err.message);
+            setError(err.message || "Failed to fetch news. Please ensure the edge function is deployed.");
         } finally {
             setLoading(false);
         }
