@@ -35,7 +35,7 @@ export function AdBanner({ adSlot, adFormat = "auto", className = "" }: AdBanner
         ref={adRef}
         className="adsbygoogle"
         style={{ display: "block" }}
-        data-ad-client="ca-pub-XXXXXXXXXX" // Replace with your AdSense Publisher ID
+        data-ad-client="ca-pub-6192359851037337" // Replace with your AdSense Publisher ID
         data-ad-slot={adSlot}
         data-ad-format={adFormat}
         data-full-width-responsive="true"

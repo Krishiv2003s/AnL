@@ -17,7 +17,7 @@ export function AdSidebar({ adSlot, className = "" }: AdSidebarProps) {
 
   useEffect(() => {
     if (isLoaded.current) return;
-    
+
     try {
       if (typeof window !== "undefined" && window.adsbygoogle) {
         window.adsbygoogle.push({});
@@ -34,7 +34,7 @@ export function AdSidebar({ adSlot, className = "" }: AdSidebarProps) {
         ref={adRef}
         className="adsbygoogle"
         style={{ display: "block" }}
-        data-ad-client="ca-pub-XXXXXXXXXX" // Replace with your AdSense Publisher ID
+        data-ad-client="ca-pub-6192359851037337" // Replace with your AdSense Publisher ID
         data-ad-slot={adSlot}
         data-ad-format="vertical"
         data-full-width-responsive="true"
@@ -46,7 +46,7 @@ export function AdSidebar({ adSlot, className = "" }: AdSidebarProps) {
 // Placeholder component for development/preview
 export function AdSidebarPlaceholder({ className = "" }: { className?: string }) {
   return (
-    <div 
+    <div
       className={`bg-muted/50 border border-dashed border-muted-foreground/30 rounded-lg flex flex-col items-center justify-center text-muted-foreground text-sm min-h-[250px] ${className}`}
     >
       <div className="text-center p-4">

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { AdBanner } from "@/components/AdBanner";
 import { ArrowRight, Upload, BarChart3, FileText, Shield, Sparkles } from "lucide-react";
 
 export function HeroSection() {
@@ -31,9 +32,14 @@ export function HeroSection() {
 
           {/* Subheading */}
           <p className="mb-10 text-lg text-primary/70 md:text-xl max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: "0.1s" }}>
-            Upload your bank statements, Form 16, and ledgers. Get instant AI-powered analysis, 
+            Upload your bank statements, Form 16, and ledgers. Get instant AI-powered analysis,
             balance sheets, and personalized tax filing recommendations for India.
           </p>
+
+          {/* Ad Banner */}
+          <div className="mb-10 w-full flex justify-center animate-fade-in">
+            <AdBanner adSlot="1234567890" className="w-full max-w-3xl" />
+          </div>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
