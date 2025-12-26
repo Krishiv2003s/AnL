@@ -1,4 +1,5 @@
 import { Scale } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function Footer() {
   return (
@@ -14,9 +15,9 @@ export function Footer() {
           </div>
 
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-foreground transition-colors">Contact</a>
+            <Link to="/privacy-policy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+            <Link to="/terms-conditions" className="hover:text-foreground transition-colors">Terms of Service</Link>
+            <Link to="/support" className="hover:text-foreground transition-colors">Contact</Link>
           </div>
 
           <p className="text-sm text-muted-foreground">
