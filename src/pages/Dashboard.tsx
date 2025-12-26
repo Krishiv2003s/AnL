@@ -348,7 +348,9 @@ export default function Dashboard() {
 
               {/* Accounts Table */}
               {analysisResult?.accounts && analysisResult.accounts.length > 0 && (
-                <AccountsTable accounts={analysisResult.accounts} />
+                <div className="overflow-x-auto">
+                  <AccountsTable accounts={analysisResult.accounts} />
+                </div>
               )}
 
               {/* Tax Comparison */}
@@ -382,7 +384,7 @@ export default function Dashboard() {
                   ? "SELECT A DOCUMENT TO VIEW ANALYSIS"
                   : "UPLOAD A DOCUMENT TO BEGIN ANALYSIS"}
               </p>
-              <div className="mt-4 flex justify-center gap-4 text-xs text-muted-foreground/50">
+              <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-muted-foreground/50">
                 <span>• Bank Statements</span>
                 <span>• Form 16</span>
                 <span>• Ledgers</span>
