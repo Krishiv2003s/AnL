@@ -496,9 +496,8 @@ export default function BalanceSheet() {
                     </div>
                 )}
 
-                {/* Inputs Header */}
-                <div className="flex justify-between items-start mb-8 gap-4 no-print">
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 w-full">
+                <div className="flex flex-col lg:flex-row justify-between items-start mb-8 gap-4 no-print">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full">
                         <div>
                             <Label>Client Name</Label>
                             <Input value={details.client_name} onChange={e => setDetails({ ...details, client_name: e.target.value })} />
