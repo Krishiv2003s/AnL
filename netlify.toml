@@ -1,4 +1,1 @@
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# No redirects here, using public/_redirects instead
