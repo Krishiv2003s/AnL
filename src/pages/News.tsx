@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { supabase } from "@/integrations/supabase/client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ExternalLink, Newspaper, Clock } from "lucide-react";
@@ -22,16 +23,14 @@ export default function News() {
         setLoading(true);
         setError(null);
         try {
-            // Use Netlify Function instead of Supabase Edge Function
-            const response = await fetch('/.netlify/functions/get-news');
+            const { data, error: invokeError } = await supabase.functions.invoke('get-news');
 
-            if (!response.ok) throw new Error("Failed to fetch news. Deployment might still be in progress.");
+            if (invokeError) throw invokeError;
 
-            const data = await response.json();
             setNews(data || []);
         } catch (err: any) {
             console.error("News error:", err);
-            setError("Netlify News Error: " + (err.message || "Unknown error"));
+            setError("News Fetch Error: " + (err.message || "Unknown error"));
         } finally {
             setLoading(false);
         }
