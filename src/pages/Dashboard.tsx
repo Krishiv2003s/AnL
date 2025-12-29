@@ -8,7 +8,7 @@ import { BalanceSheetSummary } from "@/components/BalanceSheetSummary";
 import { DocumentHistory } from "@/components/DocumentHistory";
 import { TaxComparison } from "@/components/TaxComparison";
 import { IncomeExpenseChart } from "@/components/IncomeExpenseChart";
-import { AdBannerPlaceholder } from "@/components/AdBanner";
+
 import { AnalysisLoadingSkeleton } from "@/components/AnalysisSkeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -297,7 +297,7 @@ export default function Dashboard() {
       <Header />
       <main className="container pt-24 pb-12">
         {/* Top Banner Ad */}
-        <AdBannerPlaceholder className="h-20 mb-6" />
+
 
         {/* Hero Section with Market-like Header */}
         <div className="mb-8 text-center">
@@ -395,7 +395,7 @@ export default function Dashboard() {
         </div>
 
         {/* Bottom Banner Ad */}
-        <AdBannerPlaceholder className="h-20 mt-8" />
+
 
 
       </main>

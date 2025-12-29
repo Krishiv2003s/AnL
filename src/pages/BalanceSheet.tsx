@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Download, Archive, AlertTriangle, X, RotateCcw, Merge } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
 import { Header } from "@/components/Header";
-import { SidebarAd } from "@/components/AdBanner";
+
 import { MultiSelect } from "@/components/MultiSelect";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -469,8 +469,7 @@ export default function BalanceSheet() {
     return (
         <div className="min-h-screen bg-background grid-bg relative">
             <Header />
-            <SidebarAd side="left" />
-            <SidebarAd side="right" />
+
             <main className="container pt-24 pb-12 relative z-0">
                 {/* Disclaimer / Warning Header */}
                 {warnings.length > 0 && (

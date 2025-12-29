@@ -1,6 +1,3 @@
-self.options = {
-    "domain": "5gvci.com",
-    "zoneId": 10377923
-}
-self.lary = ""
-importScripts('https://5gvci.com/act/files/service-worker.min.js?r=sw')
+// Monetag ad integration removed
+// Empty service worker to prevent persistent ad behavior
+self.addEventListener('fetch', () => { });

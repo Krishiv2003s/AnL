@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { SidebarAd } from "@/components/AdBanner";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ExternalLink, Newspaper, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,8 +47,7 @@ export default function News() {
     return (
         <div className="min-h-screen bg-background grid-bg relative">
             <Header />
-            <SidebarAd side="left" />
-            <SidebarAd side="right" />
+
 
             <main className="container pt-24 pb-12 relative z-0">
                 <div className="max-w-4xl mx-auto">
