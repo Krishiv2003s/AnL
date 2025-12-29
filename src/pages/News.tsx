@@ -57,7 +57,7 @@ export default function News() {
                                 Economic News
                             </h1>
                             <p className="text-sm sm:text-base text-muted-foreground mt-2">
-                                Latest Indian business & economic updates from the last 5 hours.
+                                Latest Indian business & economic updates from the last 24 hours.
                             </p>
                         </div>
                         <Button variant="outline" size="sm" onClick={() => fetchNews()} disabled={loading} className="w-full sm:w-auto">
@@ -81,7 +81,7 @@ export default function News() {
                         <div className="text-center py-20 border border-dashed rounded-xl bg-muted/30">
                             <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                             <h3 className="text-lg font-medium">No recent news</h3>
-                            <p className="text-muted-foreground">No Indian economic news found in the last 5 hours. Check back soon!</p>
+                            <p className="text-muted-foreground">No Indian economic news found in the last 24 hours. Check back soon!</p>
                         </div>
                     ) : (
                         <div className="grid gap-4">

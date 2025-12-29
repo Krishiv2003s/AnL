@@ -43,8 +43,8 @@ Deno.serve(async (req) => {
             const diffMs = now.getTime() - pubDate.getTime();
             const diffHours = diffMs / (1000 * 60 * 60);
 
-            // Filter: Only last 5 hours
-            if (diffHours <= 5) {
+            // Filter: Only last 24 hours
+            if (diffHours <= 24) {
                 items.push({
                     title: decodeHtml(title),
                     link,
