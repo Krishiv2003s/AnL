@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Scale, LogOut, LayoutDashboard, Settings, Headphones, Newspaper, Menu } from "lucide-react";
+import { Scale, LogOut, LayoutDashboard, Settings, Headphones, Newspaper, Menu, ShieldCheck } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export function Header() {
@@ -16,12 +16,14 @@ export function Header() {
       { to: "/dashboard", label: "Analysis", icon: LayoutDashboard },
       { to: "/news", label: "News", icon: Newspaper },
       { to: "/balance-sheet", label: "Bal. Sheet", icon: Scale },
+      { to: "/itr-audit", label: "ITR Audit", icon: ShieldCheck },
       { to: "/support", label: "Support", icon: Headphones },
       { to: "/settings", label: "Settings", icon: Settings },
     ] : [
       { to: "/dashboard", label: "Analysis", icon: LayoutDashboard },
       { to: "/news", label: "News", icon: Newspaper },
       { to: "/balance-sheet", label: "Bal. Sheet", icon: Scale },
+      { to: "/itr-audit", label: "ITR Audit", icon: ShieldCheck },
       { to: "/support", label: "Support", icon: Headphones },
     ];
 
