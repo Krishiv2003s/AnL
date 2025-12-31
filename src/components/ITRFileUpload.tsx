@@ -2,15 +2,19 @@ import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, FileText, X, Loader2, Zap, ShieldCheck } from "lucide-react";
+import { Upload, FileText, X, Loader2, Zap, ShieldCheck, Trash2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ITRFileUploadProps {
-    onFileSelect: (file: File, documentType: string) => void;
+    title: string;
+    description: string;
+    allowedTypes: string[];
     isUploading: boolean;
+    onChange: (files: { file: File; documentType: string; id: string }[]) => void;
+    maxFiles?: number;
 }
 
-const itrDocumentTypes = [
+const allDocumentTypes = [
     { value: "itr_json", label: "ITR (JSON Format)" },
     { value: "itr_pdf", label: "ITR (PDF Copy)" },
     { value: "ais", label: "AIS (Annual Info Statement)" },
@@ -19,35 +23,48 @@ const itrDocumentTypes = [
     { value: "previous_itr", label: "Previous Year ITR" },
 ];
 
-export function ITRFileUpload({ onFileSelect, isUploading }: ITRFileUploadProps) {
+export function ITRFileUpload({
+    title,
+    description,
+    allowedTypes,
+    isUploading,
+    onChange,
+    maxFiles = 10,
+}: ITRFileUploadProps) {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [documentType, setDocumentType] = useState<string>("");
+    const [localFiles, setLocalFiles] = useState<{ file: File; type: string; id: string }[]>([]);
     const [error, setError] = useState<string>("");
 
-    const onDrop = useCallback((acceptedFiles: File[]) => {
-        setError("");
-        if (acceptedFiles.length > 0) {
-            const file = acceptedFiles[0];
-            const isValidType =
-                file.type === "application/pdf" ||
-                file.type === "application/json" ||
-                file.name.endsWith(".json") ||
-                file.type === "application/vnd.ms-excel" ||
-                file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    const filteredTypes = allDocumentTypes.filter((t) => allowedTypes.includes(t.value));
 
-            if (!isValidType) {
-                setError("Please upload a PDF, JSON, or Excel file");
-                return;
+    const onDrop = useCallback(
+        (acceptedFiles: File[]) => {
+            setError("");
+            if (acceptedFiles.length > 0) {
+                const file = acceptedFiles[0];
+                const isValidType =
+                    file.type === "application/pdf" ||
+                    file.type === "application/json" ||
+                    file.name.endsWith(".json") ||
+                    file.type === "application/vnd.ms-excel" ||
+                    file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                if (!isValidType) {
+                    setError("Please upload a PDF, JSON, or Excel file");
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) {
+                    setError("File size must be less than 10MB");
+                    return;
+                }
+
+                setSelectedFile(file);
             }
-
-            if (file.size > 10 * 1024 * 1024) {
-                setError("File size must be less than 10MB");
-                return;
-            }
-
-            setSelectedFile(file);
-        }
-    }, []);
+        },
+        [isUploading]
+    );
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -58,139 +75,179 @@ export function ITRFileUpload({ onFileSelect, isUploading }: ITRFileUploadProps)
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
         },
         maxFiles: 1,
-        disabled: isUploading,
+        disabled: isUploading || localFiles.length >= maxFiles,
     });
 
-    const handleUpload = () => {
+    const addFile = () => {
         if (selectedFile && documentType) {
-            onFileSelect(selectedFile, documentType);
+            let nextFiles;
+            const existingIndex = localFiles.findIndex((f) => f.type === documentType);
+
+            if (existingIndex !== -1) {
+                nextFiles = [...localFiles];
+                nextFiles[existingIndex] = { file: selectedFile, type: documentType, id: Date.now().toString() };
+            } else {
+                nextFiles = [...localFiles, { file: selectedFile, type: documentType, id: Date.now().toString() }];
+            }
+
+            setLocalFiles(nextFiles);
+            onChange(nextFiles);
+            setSelectedFile(null);
+            setDocumentType("");
         }
     };
 
-    const clearFile = () => {
+    const removeFile = (id: string) => {
+        const nextFiles = localFiles.filter((f) => f.id !== id);
+        setLocalFiles(nextFiles);
+        onChange(nextFiles);
+    };
+
+    const clearSelected = () => {
         setSelectedFile(null);
         setError("");
     };
 
     return (
-        <div className="ticker-card overflow-hidden">
-            <div className="p-6 border-b border-border/30">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Upload className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                            <h3 className="font-display text-lg font-semibold">Self-Audit Upload</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Upload ITR, AIS, or 26AS for verification
-                            </p>
-                        </div>
+        <div className="ticker-card overflow-hidden h-full">
+            <div className="p-5 border-b border-border/30">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Upload className="h-5 w-5 text-primary" />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <ShieldCheck className="h-4 w-4 text-profit" />
-                        <span className="text-xs font-mono text-profit">SECURE & PRIVATE</span>
+                    <div>
+                        <h3 className="font-display text-sm font-bold uppercase tracking-wider">{title}</h3>
+                        <p className="text-xs text-muted-foreground">{description}</p>
                     </div>
                 </div>
             </div>
 
-            <div className="p-6 space-y-4">
-                <div className="space-y-2">
-                    <label className="text-sm font-mono text-muted-foreground uppercase tracking-wider">
-                        Document Category
-                    </label>
-                    <Select value={documentType} onValueChange={setDocumentType} disabled={isUploading}>
-                        <SelectTrigger className="bg-secondary/50 border-border/50 focus:border-primary">
-                            <SelectValue placeholder="Select document type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {itrDocumentTypes.map((type) => (
-                                <SelectItem key={type.value} value={type.value}>
-                                    {type.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div
-                    {...getRootProps()}
-                    className={cn(
-                        "relative rounded-xl border-2 border-dashed p-8 text-center transition-all cursor-pointer",
-                        isDragActive
-                            ? "border-primary bg-primary/5"
-                            : "border-border/50 hover:border-primary/50 hover:bg-secondary/30",
-                        isUploading && "pointer-events-none opacity-50"
-                    )}
-                >
-                    <input {...getInputProps()} />
-
-                    {selectedFile ? (
-                        <div className="flex items-center justify-center gap-4">
-                            <div className="w-12 h-12 rounded-lg bg-profit/10 flex items-center justify-center">
-                                <FileText className="h-6 w-6 text-profit" />
-                            </div>
-                            <div className="text-left">
-                                <p className="font-mono font-medium truncate max-w-[200px]">{selectedFile.name}</p>
-                                <p className="text-sm text-muted-foreground font-mono">
-                                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
-                            </div>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    clearFile();
-                                }}
-                                disabled={isUploading}
-                                className="hover:bg-loss/10 hover:text-loss"
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
+            <div className="p-5 space-y-5">
+                {/* List of successfully uploaded files */}
+                {localFiles.length > 0 && (
+                    <div className="space-y-2">
+                        <div className="grid gap-2">
+                            {localFiles.map((fileItem) => {
+                                const typeLabel =
+                                    allDocumentTypes.find((t) => t.value === fileItem.type)?.label || fileItem.type;
+                                return (
+                                    <div
+                                        key={fileItem.id}
+                                        className="flex items-center justify-between p-2 rounded-lg bg-secondary/30 border border-border/50 group"
+                                    >
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <FileText className="h-4 w-4 text-primary shrink-0" />
+                                            <div className="overflow-hidden">
+                                                <p className="text-[11px] font-bold truncate">{fileItem.file.name}</p>
+                                                <p className="text-[9px] text-primary/70 font-mono uppercase">
+                                                    {typeLabel}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => removeFile(fileItem.id)}
+                                            className="h-7 w-7 text-muted-foreground hover:text-loss transition-colors"
+                                            disabled={isUploading}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                );
+                            })}
                         </div>
-                    ) : (
-                        <div className="space-y-3">
-                            <div className="w-16 h-16 mx-auto rounded-xl bg-secondary/50 flex items-center justify-center">
-                                <Upload className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                            <div>
-                                <p className="text-lg font-medium mb-1">
-                                    {isDragActive ? "Drop your file here" : "Drag & drop your file"}
-                                </p>
-                                <p className="text-sm text-muted-foreground font-mono">
-                                    or click to browse • PDF, JSON, Excel
-                                </p>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {error && (
-                    <div className="flex items-center gap-2 text-sm text-loss font-mono">
-                        <div className="w-2 h-2 rounded-full bg-loss" />
-                        {error}
                     </div>
                 )}
 
-                <Button
-                    onClick={handleUpload}
-                    disabled={!selectedFile || !documentType || isUploading}
-                    className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-mono uppercase tracking-wider"
-                >
-                    {isUploading ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Processing Logic...
-                        </>
-                    ) : (
-                        <>
-                            <Zap className="mr-2 h-4 w-4" />
-                            Run Self-Audit
-                        </>
-                    )}
-                </Button>
+                {localFiles.length < maxFiles ? (
+                    <div className="space-y-3 pt-2">
+                        <div className="space-y-1.5">
+                            <Select value={documentType} onValueChange={setDocumentType} disabled={isUploading}>
+                                <SelectTrigger className="h-9 bg-secondary/50 border-border/50 focus:border-primary text-xs">
+                                    <SelectValue placeholder="Select type..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {filteredTypes.map((type) => (
+                                        <SelectItem key={type.value} value={type.value}>
+                                            {type.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div
+                            {...getRootProps()}
+                            className={cn(
+                                "relative rounded-lg border-2 border-dashed p-4 text-center transition-all cursor-pointer",
+                                isDragActive
+                                    ? "border-primary bg-primary/5"
+                                    : "border-border/50 hover:border-primary/50 hover:bg-secondary/30",
+                                (isUploading || localFiles.length >= maxFiles) && "pointer-events-none opacity-50"
+                            )}
+                        >
+                            <input {...getInputProps()} />
+
+                            {selectedFile ? (
+                                <div className="flex items-center justify-center gap-3">
+                                    <div className="w-8 h-8 rounded bg-profit/10 flex items-center justify-center shrink-0">
+                                        <FileText className="h-4 w-4 text-profit" />
+                                    </div>
+                                    <div className="text-left overflow-hidden flex-1">
+                                        <p className="text-[11px] font-bold truncate">{selectedFile.name}</p>
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            clearSelected();
+                                        }}
+                                        disabled={isUploading}
+                                        className="h-7 w-7 hover:bg-loss/10 hover:text-loss"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-1">
+                                    <p className="text-xs font-medium">Click to upload</p>
+                                    <p className="text-[10px] text-muted-foreground font-mono">PDF, JSON, Excel</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <Button
+                            onClick={addFile}
+                            disabled={!selectedFile || !documentType || isUploading}
+                            variant="secondary"
+                            className="w-full h-9 font-mono text-[10px] uppercase tracking-widest"
+                        >
+                            Add Document
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="p-3 rounded-lg bg-profit/5 border border-profit/20 text-center">
+                        <CheckCircle2 className="h-5 w-5 text-profit mx-auto mb-1" />
+                        <p className="text-[10px] font-mono text-profit">Maximum documents reached</p>
+                    </div>
+                )}
+
+                {error && (
+                    <div className="flex items-center gap-2 text-[10px] text-loss font-mono p-2 rounded bg-loss/5">
+                        <AlertTriangle className="h-3 w-3" />
+                        {error}
+                    </div>
+                )}
             </div>
         </div>
+    );
+}
+    );
+}
+
+// Re-adding Trash2 and AlertTriangle because I missed them in the first instruction/replacement logic if they weren't imported
+// Let me check imports again.
     );
 }

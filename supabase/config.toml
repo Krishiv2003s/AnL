@@ -3,4 +3,7 @@ project_id = "sythiflfkbctfwftmgxx"
 [functions.analyze-document]
 verify_jwt = true
 
+[functions.get-news]
+verify_jwt = false
+
 
