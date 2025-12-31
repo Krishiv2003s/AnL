@@ -17,6 +17,7 @@ interface ITRFileUploadProps {
 const allDocumentTypes = [
     { value: "itr_json", label: "ITR (JSON Format)" },
     { value: "itr_pdf", label: "ITR (PDF Copy)" },
+    { value: "itr_coi", label: "ITR Computation (COI)" },
     { value: "ais", label: "AIS (Annual Info Statement)" },
     { value: "form_26as", label: "Form 26AS" },
     { value: "bank_statement", label: "Bank Interest Statement" },
@@ -226,6 +227,12 @@ export function ITRFileUpload({
                         >
                             Add Document
                         </Button>
+
+                        {title.includes("1.") && (
+                            <p className="text-[9px] text-muted-foreground italic bg-secondary/20 p-2 rounded border border-border/30">
+                                <span className="text-primary font-bold not-italic">TIP:</span> For maximum accuracy, please upload both your <span className="font-bold">ITR</span> (JSON/PDF) and its <span className="font-bold">Computation (COI)</span> file.
+                            </p>
+                        )}
                     </div>
                 ) : (
                     <div className="p-3 rounded-lg bg-profit/5 border border-profit/20 text-center">

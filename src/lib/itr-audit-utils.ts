@@ -43,6 +43,11 @@ export interface AuditResult {
         totalIncomeMismatches: number;
         totalDeductionFlags: number;
         totalTdsMismatches: number;
+        rawData: {
+            totalIncome: number;
+            totalDeductions: number;
+            totalTds: number;
+        };
     };
 }
 
@@ -166,6 +171,11 @@ export const analyzeITR = (
             totalIncomeMismatches: incomeMismatches,
             totalDeductionFlags: deductionFlags,
             totalTdsMismatches: tdsMismatches,
+            rawData: {
+                totalIncome: itr.salary + itr.interestIncome + itr.dividendIncome + itr.capitalGains,
+                totalDeductions: itr.deductions.section80C + itr.deductions.section80D + itr.deductions.section80G,
+                totalTds: itr.tdsClaimed
+            }
         },
     };
 };

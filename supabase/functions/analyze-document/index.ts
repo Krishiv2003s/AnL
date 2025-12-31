@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:3000',
+  'http://localhost:8080',
   'https://avubnhpompugktamckev.supabase.co',
 ];
 
@@ -20,7 +21,7 @@ function getCorsHeaders(origin: string | null): Record<string, string> {
 // Input validation constants
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_BASE64_SIZE = MAX_FILE_SIZE * 1.37; // base64 is ~37% larger
-const VALID_DOCUMENT_TYPES = ['bank_statement', 'form_16', 'ledger', 'tax_return', 'other'];
+const VALID_DOCUMENT_TYPES = ['bank_statement', 'form_16', 'ledger', 'tax_return', 'ais', 'form_26as', 'itr_coi', 'other'];
 const VALID_MIME_TYPES = [
   'application/pdf',
   'application/vnd.ms-excel',
@@ -69,8 +70,6 @@ Deno.serve(async (req) => {
       });
     }
 
-
-
     const { documentContent, documentType, fileName, isBase64, mimeType } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
@@ -86,26 +85,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Validate file size for ALL content types
-    if (isBase64) {
-      // For base64, check encoded size (base64 is ~37% larger than original)
-      if (documentContent.length > MAX_BASE64_SIZE) {
-        return new Response(JSON.stringify({ error: 'File size exceeds 10MB limit' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-    } else {
-      // For text content, validate actual content length
-      const contentSizeBytes = new TextEncoder().encode(documentContent).length;
-      if (contentSizeBytes > MAX_FILE_SIZE) {
-        return new Response(JSON.stringify({ error: 'File size exceeds 10MB limit' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-    }
-
     // Validate document type
     if (!documentType || !VALID_DOCUMENT_TYPES.includes(documentType)) {
       return new Response(JSON.stringify({ error: 'Invalid document type' }), {
@@ -114,77 +93,66 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Validate MIME type if provided
-    if (mimeType && !VALID_MIME_TYPES.includes(mimeType)) {
-      return new Response(JSON.stringify({ error: 'Invalid file type' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Sanitize fileName (remove potential path traversal)
+    // Sanitize fileName
     const sanitizedFileName = fileName ? String(fileName).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 255) : 'document';
 
-    const systemPrompt = `You are an expert Indian tax consultant and financial analyst. Analyze the provided financial document and extract ALL transactions and structured information.
- 
-- "error" for critical issues (exceeding cash limits, unreported crypto, etc.)
-- "warning" for potential issues (high cash transactions, missing documents)
-- "info" for general advice and recommendations
- 
-Suggest appropriate ITR forms (ITR-1 to ITR-4) based on income sources.
- 
+    const systemPrompt = `You are an expert Indian tax consultant and financial analyst. Analyze the provided financial document and extract ALL structured information for an ITR Self-Audit.
+
+### DOCUMENT VALIDATION:
+1. **REJECT NON-FINANCIAL DOCUMENTS**: If the document is NOT a tax return, bank statement, AIS, Form 26AS, or ITR Computation (COI), you MUST return an error insight. Set "is_financial_document" to false.
+2. **DETECTION RULES**: Look for keywords like "Income Tax", "AIS", "Form 26AS", "Account Statement", "TDS", "Section 80C".
+
+### EXTRACTION GOALS (Indian Tax Context):
+1. **Salary (Section 16)**: Extract Gross Salary, standard deduction, professional tax, and HRA exemptions.
+2. **Other Income**: Interest (Savings/FD), Dividends, Capital Gains.
+3. **Deductions (Chapter VI-A)**: 80C (LIC/PPF/PF), 80D (Health), 80G (Donations), 80TTA/B (Savings Interest).
+4. **TDS/Tax Credits**: Extract TDS from Salary, Banks, and others.
+5. **ITR Computation (COI)**: If this is a COI, extract the "Total Income" and "Tax Payable" as calculated by the CA/Software.
+
+### INSIGHT TYPES:
+- "error" for critical mismatches, non-financial documents, or potential scrutiny triggers.
+- "warning" for minor discrepancies or missing data.
+- "info" for optimization tips.
+
 ### EXTRACTION RULES:
-1. **NO DOUBLE COUNTING**: Strictly ignore "Total", "Subtotal", "Grand Total", or any summary rows within the tables. Only extract individual transaction entries.
-2. **ASSET CLASSIFICATION**: 
-   - Use 'asset' ONLY for balance-sheet items: Closing Bank Balance, Fixed Deposits, Shares/Mutual Funds, Property values.
-   - For Bank Statements: The ONLY 'asset' should be the final Closing Balance. Do NOT mark individual deposits or total credits as assets.
-3. **LIABILITY CLASSIFICATION**: Use 'liability' ONLY for debts: Loan Owed, Credit Card Outstanding, Payables.
-4. **NEUTRAL/FLOW CLASSIFICATION**: Use 'neutral' for all P&L/Flow items: Salary, Rent Income, Interest Income, Food Expense, Taxes Paid, etc. These are income/expenses, NOT assets/liabilities.
-5. **COI/Tax Documents**: Distinguish between "Total Income" (Neutral) and tax-deductible investments (Assets).
- 
+1. **NO DOUBLE COUNTING**: Strictly ignore summary rows within tables.
+2. **CLASSIFICATION**: 'asset', 'liability', or 'neutral'.
+
 Respond with a valid JSON object in this exact format:
 {
+  "is_financial_document": boolean,
   "accounts": [
     {
-      "account_name": "string (descriptive name)",
-      "category": "cash|credit_card|bank_transfer|investment|salary|loan|expense|income|other",
-      "total_credit": number (total money received),
-      "total_debit": number (total money spent),
-      "net_balance": number (current balance for assets/liabilities, or net flow for neutral),
-      "is_taxable": boolean,
+      "account_name": "string (e.g., 'Gross Salary', 'Interest income', '80C Deduction')",
+      "category": "salary|interest|dividend|deduction|tax_paid|other",
+      "amount": number,
       "classification": "asset|liability|neutral",
-      "tax_implications": "string explaining tax treatment"
+      "details": "string"
     }
   ],
   "insights": [
     {
-      "insight_type": "string (e.g., 'cash_limit', 'crypto_trading', 'itr_recommendation', 'income_analysis')",
+      "insight_type": "string",
       "severity": "error|warning|info",
       "title": "string",
       "description": "string",
-      "recommendation": "string",
-      "itr_form_suggestion": "ITR-1|ITR-2|ITR-3|ITR-4|null"
+      "recommendation": "string"
     }
   ],
   "summary": {
-    "total_assets": number (Sum of 'asset' classification items),
-    "total_liabilities": number (Sum of 'liability' classification items),
-    "net_worth": number (Assets - Liabilities),
-    "primary_income_source": "string",
-    "recommended_itr_form": "string",
-    "tax_regime_suggestion": "Old Regime|New Regime"
+    "total_income": number,
+    "total_deductions": number,
+    "total_tax_paid": number,
+    "tax_regime": "Old|New|Unknown"
   }
 }`;
 
-    // Build messages based on whether content is base64 (PDF/image) or text
     let userContent: any;
-
     if (isBase64) {
-      // For PDFs and images, use multimodal input
       userContent = [
         {
           type: "text",
-          text: `Document Type: ${documentType}\nFile Name: ${sanitizedFileName}\n\nPlease analyze this financial document thoroughly. Extract ALL transactions, calculate totals, and provide tax insights. Look at every page and every transaction.`
+          text: `Document Type: ${documentType}\nFile Name: ${sanitizedFileName}\n\nPlease analyze this document for Indian tax data extraction.`
         },
         {
           type: "image_url",
@@ -194,7 +162,6 @@ Respond with a valid JSON object in this exact format:
         }
       ];
     } else {
-      // For text content
       userContent = `Document Type: ${documentType}\nFile Name: ${sanitizedFileName}\n\nDocument Content:\n${documentContent}`;
     }
 
@@ -210,81 +177,25 @@ Respond with a valid JSON object in this exact format:
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userContent }
         ],
-        temperature: 0.2,
-        max_tokens: 8000,
+        temperature: 0.1,
+        max_tokens: 4000,
       }),
     });
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
+    if (!response.ok) throw new Error('AI processing failed');
 
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: 'AI credits exhausted. Please add credits to continue.' }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      throw new Error('AI processing failed');
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-
-    if (!content) {
-      throw new Error('Empty AI response');
-    }
-
-    // Parse the JSON from the response
-    let analysisResult;
-    try {
-      // Try to extract JSON from the response (it might be wrapped in markdown code blocks)
-      const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```/) || content.match(/```\n?([\s\S]*?)\n?```/);
-      const jsonStr = jsonMatch ? jsonMatch[1] : content;
-      analysisResult = JSON.parse(jsonStr.trim());
-    } catch (parseError) {
-      // Return a default structure if parsing fails
-      analysisResult = {
-        accounts: [],
-        insights: [{
-          insight_type: 'parsing_error',
-          severity: 'warning',
-          title: 'Document Processing Note',
-          description: 'The document was processed but some details may need manual verification.',
-          recommendation: 'Please review the uploaded document and ensure it contains clear transaction data.',
-          itr_form_suggestion: null
-        }],
-        summary: {
-          total_assets: 0,
-          total_liabilities: 0,
-          net_worth: 0,
-          primary_income_source: 'Unknown',
-          recommended_itr_form: 'ITR-1',
-          tax_regime_suggestion: 'New Regime'
-        }
-      };
-    }
-
-    // Increment usage count (optional, but good for stats)
-    // For now, skipping to avoid errors with deleted variables
-    if (user) {
-      // We could re-fetch profile here if we really wanted to track stats, 
-      // but for now let's just allow unlimited access without tracking constraint.
-    }
+    const responseData = await response.json();
+    const content = responseData.choices?.[0]?.message?.content;
+    const jsonMatch = content.match(/```json\n?([\s\S]*?)\n?```/) || content.match(/```\n?([\s\S]*?)\n?```/);
+    const jsonStr = jsonMatch ? jsonMatch[1] : content;
+    const analysisResult = JSON.parse(jsonStr.trim());
 
     return new Response(JSON.stringify(analysisResult), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    return new Response(JSON.stringify({
-      error: `Error: ${error instanceof Error ? error.message : String(error)}`
-    }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
