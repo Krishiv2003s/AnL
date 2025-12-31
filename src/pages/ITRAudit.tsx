@@ -2,19 +2,22 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ITRFileUpload } from "@/components/ITRFileUpload";
-import { analyzeITR, AuditResult, ITRData, AISData, Form26ASData } from "@/lib/itr-audit-utils";
+import { analyzeITR } from "@/lib/itr-audit-utils";
+import type { ITRData, AISData, Form26ASData, AuditResult } from "@/lib/itr-audit-utils";
 import {
     ShieldCheck,
-    AlertTriangle,
-    CheckCircle2,
-    XCircle,
     Info,
-    ArrowRight,
     FileText,
+    CheckCircle2,
     Activity,
+    AlertTriangle,
+    XCircle,
     History,
+    Trash2,
+    ArrowRight,
+    Zap,
+    Loader2,
     Lock,
-    Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -25,8 +28,8 @@ export default function ITRAudit() {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [result, setResult] = useState<AuditResult | null>(null);
 
-    const [targetItrFiles, setTargetItrFiles] = useState<{ file: File; documentType: string; id: string }[]>([]);
-    const [supportingDocs, setSupportingDocs] = useState<{ file: File; documentType: string; id: string }[]>([]);
+    const [targetItrFiles, setTargetItrFiles] = useState<{ file: File; type: string; id: string }[]>([]);
+    const [supportingDocs, setSupportingDocs] = useState<{ file: File; type: string; id: string }[]>([]);
 
     const handleAudit = async () => {
         const allFiles = [...targetItrFiles, ...supportingDocs];
@@ -38,9 +41,9 @@ export default function ITRAudit() {
         // Mock processing delay
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
-        const hasItr = targetItrFiles.some((f) => f.documentType.startsWith("itr"));
-        const hasAis = supportingDocs.some((f) => f.documentType === "ais");
-        const has26as = supportingDocs.some((f) => f.documentType === "form_26as");
+        const hasItr = targetItrFiles.some((f) => f.type.startsWith("itr"));
+        const hasAis = supportingDocs.some((f) => f.type === "ais");
+        const has26as = supportingDocs.some((f) => f.type === "form_26as");
 
         // Mock extracted data
         const mockItr: ITRData = {
@@ -333,11 +336,5 @@ export default function ITRAudit() {
 
             <Footer />
         </div>
-    );
-}
-            </main >
-
-    <Footer />
-        </div >
     );
 }

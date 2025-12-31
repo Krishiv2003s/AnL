@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, FileText, X, Loader2, Zap, ShieldCheck, Trash2, AlertTriangle } from "lucide-react";
+import { Upload, FileText, Trash2, X, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ITRFileUploadProps {
@@ -10,7 +10,7 @@ interface ITRFileUploadProps {
     description: string;
     allowedTypes: string[];
     isUploading: boolean;
-    onChange: (files: { file: File; documentType: string; id: string }[]) => void;
+    onChange: (files: { file: File; type: string; id: string }[]) => void;
     maxFiles?: number;
 }
 
@@ -242,12 +242,5 @@ export function ITRFileUpload({
                 )}
             </div>
         </div>
-    );
-}
-    );
-}
-
-// Re-adding Trash2 and AlertTriangle because I missed them in the first instruction/replacement logic if they weren't imported
-// Let me check imports again.
     );
 }
