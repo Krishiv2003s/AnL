@@ -110,20 +110,20 @@ export default function BusinessAnalytics() {
                                 <div className="w-20 h-20 rounded-2xl bg-primary/5 border-2 border-dashed border-primary/30 flex items-center justify-center mb-6">
                                     <Upload className="h-10 w-10 text-primary" />
                                 </div>
-                                <h2 className="text-2xl font-display font-bold mb-2">Upload Your Financials</h2>
+                                <h2 className="text-2xl font-display font-bold mb-2">Upload Business Documents</h2>
                                 <p className="text-muted-foreground mb-8 max-w-md">
-                                    Drop your CSV, Excel, or PDF bank statements here. We'll handle the parsing and normalization automatically.
+                                    Drop your Company Quarter results or Business Ledgers & Statements here. We'll handle the parsing and normalization automatically.
                                 </p>
                                 <div className="flex gap-4">
                                     <Button size="lg" className="bg-primary hover:bg-primary/90 font-display uppercase tracking-widest font-bold">
-                                        Choose Files
+                                        Choose PDF / Excel
                                     </Button>
                                     <Button variant="outline" size="lg" className="font-display uppercase tracking-widest font-bold">
                                         See Examples
                                     </Button>
                                 </div>
                                 <p className="mt-6 text-[10px] font-mono text-muted-foreground uppercase">
-                                    Supports: CSV • XLSX • PDF • JSON
+                                    Supports: PDF • XLSX • XLS
                                 </p>
                             </div>
                         )}

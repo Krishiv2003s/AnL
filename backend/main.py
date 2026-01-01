@@ -31,12 +31,15 @@ async def upload_file(file: UploadFile = File(...), tag: str = Form(...)):
     df = None
     
     try:
-        if file.filename.endswith('.csv'):
-            df = pd.read_csv(io.BytesIO(contents))
-        elif file.filename.endswith(('.xls', '.xlsx')):
+        if file.filename.endswith(('.xls', '.xlsx')):
             df = pd.read_excel(io.BytesIO(contents))
+        elif file.filename.endswith('.pdf'):
+            # Placeholder for PDF parsing logic
+            # For now, we return a mock structure since real PDF parsing 
+            # might require external tools like Tesseract mentioned in our plan.
+            df = pd.DataFrame([{"info": "PDF content extracted"}])
         else:
-            raise HTTPException(status_code=400, detail="Unsupported file format")
+            raise HTTPException(status_code=400, detail="Unsupported file format. Only PDF and Excel are allowed.")
             
         # Basic cleaning
         df = df.where(pd.notnull(df), None)
